@@ -10,7 +10,7 @@ Le projet est divisé en deux parties principales : `client` et `server`.
 
 Le serveur gère toutes les connexions entrantes, traite les messages reçus et les redistribue à tous les clients connectés.
 
-- **Fichiers principaux:**
+- **Fichiers principaux :**
   - `ChatServer.java`: Lance le serveur et accepte les connexions des clients.
   - `UserThread.java`: Gère la communication avec les clients connectés.
 
@@ -18,7 +18,7 @@ Le serveur gère toutes les connexions entrantes, traite les messages reçus et 
 
 Le client se connecte au serveur et permet à l'utilisateur d'envoyer et de recevoir des messages.
 
-- **Fichiers principaux:**
+- **Fichiers principaux :**
   - `ChatClient.java`: Initialise la connexion au serveur et lance les threads de lecture et d'écriture.
   - `ReadThread.java`: Lit les messages du serveur.
   - `WriteThread.java`: Envoie les messages au serveur et gère l'entrée utilisateur.
@@ -35,14 +35,19 @@ Le client se connecte au serveur et permet à l'utilisateur d'envoyer et de rece
 ### Serveur
 
 1. Naviguez dans le dossier du projet.
-2. Compilez et exécutez `ChatServer.java` en utilisant la commande:
+2. Compilez et exécutez `ChatServer.java` en utilisant la commande :
    ```bash
    java tech.sofoste.server.ChatServer
 
 ### Client
 1. Ouvrez un autre terminal.
-2. Compilez et exécutez ChatClient.java en spécifiant l'adresse du serveur et le port:
+2. Compilez et exécutez ChatClient.java en spécifiant l'adresse du serveur et le port :
     ```bash
    java tech.sofoste.client.ChatClient localhost 6868
 
 Remplacez localhost et 6868 par l'adresse IP et le port appropriés si nécessaire.
+
+### Contribution
+
+Toute contribution au projet est la bienvenue ;-)
+@sofoste93
