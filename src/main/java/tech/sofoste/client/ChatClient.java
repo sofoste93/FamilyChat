@@ -38,7 +38,10 @@ public class ChatClient {
     }
 
     public static void main(String[] args) {
-        if (args.length < 2) return;
+        if (args.length < 2) {
+            System.out.println("Syntax: java ChatClient <hostname> <port>");
+            return;
+        }
 
         String hostname = args[0];
         int port = Integer.parseInt(args[1]);
