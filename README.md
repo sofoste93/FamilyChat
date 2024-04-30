@@ -31,7 +31,7 @@ Le client se connecte au serveur et permet à l'utilisateur d'envoyer et de rece
 - Gestion simple des utilisateurs se connectant et se déconnectant.
 
 ## Comment utiliser
-
+![img.png](overview.png)
 ### Serveur
 
 1. Naviguez dans le dossier du projet.
