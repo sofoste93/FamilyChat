@@ -38,3 +38,11 @@ Le client se connecte au serveur et permet à l'utilisateur d'envoyer et de rece
 2. Compilez et exécutez `ChatServer.java` en utilisant la commande:
    ```bash
    java tech.sofoste.server.ChatServer
+
+### Client
+1. Ouvrez un autre terminal.
+2. Compilez et exécutez ChatClient.java en spécifiant l'adresse du serveur et le port:
+    ```bash
+   java tech.sofoste.client.ChatClient localhost 6868
+
+Remplacez localhost et 6868 par l'adresse IP et le port appropriés si nécessaire.
