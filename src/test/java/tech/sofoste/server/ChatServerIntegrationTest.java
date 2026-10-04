@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
+import tech.sofoste.server.ChatServer;
 
 class ChatServerIntegrationTest {
     @Test

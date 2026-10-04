@@ -1,47 +1,65 @@
-# FamilyChat Console 1.1
+<div align="center">
+  <img src="assets/familychat.png" width="110" alt="FamilyChat logo">
+  <h1>FamilyChat 2</h1>
+  <p><strong>Your people · Your network · Your conversation</strong></p>
+  <p>A calm Java desktop chat that stays inside the trusted home LAN.</p>
+  <p><a href="https://github.com/sofoste93/FamilyChat/releases/latest">Download</a> · <a href="#how-to-use">How to use</a> · <a href="#learning-tour">Learning tour</a></p>
+</div>
 
-FamilyChat is a small Java console chat for people connected to the same local network. This release restores the original 1.0 university experiment before the desktop version 2.
+![FamilyChat conversation screen](docs/screenshots/familychat-v2.png)
 
-![Original FamilyChat console](overview.png)
+## What version 2 brings
+
+- One friendly desktop app can start a room or join one.
+- No account, cloud, database, history, analytics or telemetry.
+- Live family roster, join/leave notices and UTF-8 messages.
+- Help and settings are included in the interface.
+- Console commands remain available for learners and headless hosts.
+- Native packages contain Java for Windows, Linux and both Mac architectures.
 
 ## Download
 
-Download `family-chat-console-1.1.0.jar` from the [v1.1.0 release](https://github.com/sofoste93/FamilyChat/releases/tag/v1.1.0). Java 8 or newer is required.
+Choose the archive from the [latest release](https://github.com/sofoste93/FamilyChat/releases/latest):
 
-Start the host computer:
+| System | Archive |
+| --- | --- |
+| Windows x64 | `FamilyChat-Windows-x64.zip` |
+| Linux x64 | `FamilyChat-Linux-x64.tar.gz` |
+| macOS Intel | `FamilyChat-macOS-x64.tar.gz` |
+| macOS Apple Silicon | `FamilyChat-macOS-arm64.tar.gz` |
 
-```bash
-java -jar family-chat-console-1.1.0.jar server 6868
-```
+Extract the archive and launch `FamilyChat`. Java is already included.
 
-On each family computer, connect with the host's local IP address:
+## How to use
 
-```bash
-java -jar family-chat-console-1.1.0.jar client 192.168.1.20 6868
-```
+1. On one computer, enter a name and port, then select **Start a room on this PC**.
+2. Find that computer's private IPv4 address (`ipconfig` on Windows, `ip addr` on Linux, Network Settings on macOS).
+3. On the other computers, enter the host address, same port and a unique name, then select **Join room**.
+4. If the firewall asks, allow FamilyChat only on private networks.
 
-Type `/quit` or `bye` to leave. Allow TCP port `6868` through the host firewall for private networks if prompted.
+The default port is `6868`. Everyone must be on the same trusted LAN or Wi-Fi.
 
 ## Learning tour
 
-- `Main.java` parses the two launcher commands.
-- `ChatServer.java` owns the listener and the thread-safe user registry.
-- `UserThread.java` owns exactly one socket and cleans it in `finally`.
-- `ChatClient.java`, `ReadThread.java` and `WriteThread.java` split console input and network input so neither blocks the other.
-- The integration test opens two real loopback sockets and verifies an UTF-8 message.
+- `Main.java` selects desktop, version, screenshot or preserved console commands.
+- `FamilyChatApp.java` demonstrates Swing cards, background networking and callbacks to the Event Dispatch Thread.
+- `ChatServer.java` owns the TCP listener and concurrent user registry.
+- `UserThread.java` contains the small line protocol and deterministic socket cleanup.
+- `ChatServerIntegrationTest.java` connects two real clients and verifies an UTF-8 message end to end.
 
-Build and test with:
+Build from source with JDK 17+ and Maven:
 
 ```bash
 mvn clean verify
-java -jar target/family-chat-console-1.1.0.jar --help
+java -jar target/family-chat-2.0.0.jar
 ```
 
-## Network and privacy
+The restored console release remains available as [v1.1.0](https://github.com/sofoste93/FamilyChat/releases/tag/v1.1.0).
 
-Version 1 uses unencrypted TCP inside the LAN. Anyone able to observe the network traffic may read messages. Use it only on a trusted private network and never expose the port to the internet. Version 2 improves the user experience and packaging while keeping the same local-network scope.
+## Security scope
+
+FamilyChat uses unencrypted TCP and intentionally has no internet service. Other users on an untrusted network may observe or alter traffic. Never forward its port on a router and do not use it for sensitive information. A future version can add authenticated end-to-end encryption without changing the local-first model.
 
 ## License
 
 [MIT](LICENSE) © Sofoste contributors.
-

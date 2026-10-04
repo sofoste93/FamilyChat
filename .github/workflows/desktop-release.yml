@@ -1,0 +1,74 @@
+name: Desktop v2 release
+
+on:
+  push:
+    tags: ['v2.*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            package: FamilyChat-Windows-x64.zip
+            icon: assets/familychat.ico
+          - os: ubuntu-latest
+            package: FamilyChat-Linux-x64.tar.gz
+            icon: assets/familychat.png
+          - os: macos-15-intel
+            package: FamilyChat-macOS-x64.tar.gz
+            icon: assets/familychat.icns
+          - os: macos-15
+            package: FamilyChat-macOS-arm64.tar.gz
+            icon: assets/familychat.icns
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: mvn -B clean verify
+      - name: Build application image
+        shell: bash
+        run: jpackage --type app-image --input target --main-jar family-chat-2.0.0.jar --main-class tech.sofoste.Main --name FamilyChat --app-version 2.0.0 --dest package --icon "${{ matrix.icon }}"
+      - name: Smoke test Windows image
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./package/FamilyChat/FamilyChat.exe --version
+      - name: Smoke test Linux image
+        if: runner.os == 'Linux'
+        run: ./package/FamilyChat/bin/FamilyChat --version
+      - name: Smoke test macOS image
+        if: runner.os == 'macOS'
+        run: ./package/FamilyChat.app/Contents/MacOS/FamilyChat --version
+      - name: Archive Windows image
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path package/FamilyChat -DestinationPath "${{ matrix.package }}"
+      - name: Archive Unix image
+        if: runner.os != 'Windows'
+        run: tar -czf "${{ github.workspace }}/${{ matrix.package }}" -C package FamilyChat${{ runner.os == 'macOS' && '.app' || '' }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.package }}
+          path: ${{ matrix.package }}
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: release
+          merge-multiple: true
+      - run: cd release && sha256sum * > SHA256SUMS.txt
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" release/* --verify-tag --title "FamilyChat 2.0.0 — Local Family Circle" --notes-file CHANGELOG.md

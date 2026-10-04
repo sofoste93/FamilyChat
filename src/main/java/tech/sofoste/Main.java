@@ -1,16 +1,19 @@
 package tech.sofoste;
 
 import tech.sofoste.client.ChatClient;
+import tech.sofoste.desktop.FamilyChatApp;
 import tech.sofoste.server.ChatServer;
 
-/** Command-line entry point for the restored 1.x edition. */
+/** One entry point for the desktop app and the preserved console commands. */
 public final class Main {
     private static final int DEFAULT_PORT = 6868;
     private Main() { }
 
     public static void main(String[] args) {
-        if (args.length == 0 || "--help".equals(args[0])) { printHelp(); return; }
-        if ("--version".equals(args[0])) { System.out.println("FamilyChat Console 1.1.0"); return; }
+        if (args.length == 0) { FamilyChatApp.launch(); return; }
+        if ("--help".equals(args[0])) { printHelp(); return; }
+        if ("--version".equals(args[0])) { System.out.println("FamilyChat 2.0.0"); return; }
+        if ("--screenshot".equals(args[0]) && args.length > 1) { FamilyChatApp.renderScreenshot(args[1]); return; }
         try {
             if ("server".equalsIgnoreCase(args[0])) {
                 new ChatServer(args.length > 1 ? port(args[1]) : DEFAULT_PORT).execute();
@@ -29,9 +32,10 @@ public final class Main {
     }
 
     private static void printHelp() {
-        System.out.println("FamilyChat Console 1.1.0");
-        System.out.println("  Server: java -jar family-chat-console-1.1.0.jar server [port]");
-        System.out.println("  Client: java -jar family-chat-console-1.1.0.jar client <host> [port]");
+        System.out.println("FamilyChat 2.0.0");
+        System.out.println("  Desktop: java -jar family-chat-2.0.0.jar");
+        System.out.println("  Server:  java -jar family-chat-2.0.0.jar server [port]");
+        System.out.println("  Client:  java -jar family-chat-2.0.0.jar client <host> [port]");
         System.out.println("  Leave:  /quit or bye");
     }
 }
