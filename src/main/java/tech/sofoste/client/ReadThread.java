@@ -2,6 +2,7 @@ package tech.sofoste.client;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 
 public class ReadThread extends Thread {
     private BufferedReader reader;
@@ -14,7 +15,7 @@ public class ReadThread extends Thread {
 
         try {
             InputStream input = socket.getInputStream();
-            reader = new BufferedReader(new InputStreamReader(input));
+            reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
         } catch (IOException ex) {
             System.out.println("Error getting input stream: " + ex.getMessage());
             ex.printStackTrace();
@@ -25,6 +26,10 @@ public class ReadThread extends Thread {
         while (true) {
             try {
                 String response = reader.readLine();
+                if (response == null) {
+                    System.out.println("\nDisconnected from the server.");
+                    break;
+                }
                 System.out.println("\n" + response);
 
                 if (client.getUserName() != null) {

@@ -1,53 +1,47 @@
-# FamilyChat Version 1.0
+# FamilyChat Console 1.1
 
-FamilyChat est une application de chat simple en mode console utilisant Java pour permettre la communication en temps réel au sein d'un réseau domestique.
+FamilyChat is a small Java console chat for people connected to the same local network. This release restores the original 1.0 university experiment before the desktop version 2.
 
-## Structure du Projet
+![Original FamilyChat console](overview.png)
 
-Le projet est divisé en deux parties principales : `client` et `server`.
+## Download
 
-### Server
+Download `family-chat-console-1.1.0.jar` from the [v1.1.0 release](https://github.com/sofoste93/FamilyChat/releases/tag/v1.1.0). Java 8 or newer is required.
 
-Le serveur gère toutes les connexions entrantes, traite les messages reçus et les redistribue à tous les clients connectés.
+Start the host computer:
 
-- **Fichiers principaux :**
-  - `ChatServer.java`: Lance le serveur et accepte les connexions des clients.
-  - `UserThread.java`: Gère la communication avec les clients connectés.
+```bash
+java -jar family-chat-console-1.1.0.jar server 6868
+```
 
-### Client
+On each family computer, connect with the host's local IP address:
 
-Le client se connecte au serveur et permet à l'utilisateur d'envoyer et de recevoir des messages.
+```bash
+java -jar family-chat-console-1.1.0.jar client 192.168.1.20 6868
+```
 
-- **Fichiers principaux :**
-  - `ChatClient.java`: Initialise la connexion au serveur et lance les threads de lecture et d'écriture.
-  - `ReadThread.java`: Lit les messages du serveur.
-  - `WriteThread.java`: Envoie les messages au serveur et gère l'entrée utilisateur.
+Type `/quit` or `bye` to leave. Allow TCP port `6868` through the host firewall for private networks if prompted.
 
-## Fonctionnalités
+## Learning tour
 
-- Connexion multiple de clients au serveur de chat.
-- Envoi et réception de messages en temps réel.
-- Affichage des utilisateurs connectés.
-- Gestion simple des utilisateurs se connectant et se déconnectant.
+- `Main.java` parses the two launcher commands.
+- `ChatServer.java` owns the listener and the thread-safe user registry.
+- `UserThread.java` owns exactly one socket and cleans it in `finally`.
+- `ChatClient.java`, `ReadThread.java` and `WriteThread.java` split console input and network input so neither blocks the other.
+- The integration test opens two real loopback sockets and verifies an UTF-8 message.
 
-## Comment utiliser
-![img.png](overview.png)
-### Serveur
+Build and test with:
 
-1. Naviguez dans le dossier du projet.
-2. Compilez et exécutez `ChatServer.java` en utilisant la commande :
-   ```bash
-   java tech.sofoste.server.ChatServer
+```bash
+mvn clean verify
+java -jar target/family-chat-console-1.1.0.jar --help
+```
 
-### Client
-1. Ouvrez un autre terminal.
-2. Compilez et exécutez ChatClient.java en spécifiant l'adresse du serveur et le port :
-    ```bash
-   java tech.sofoste.client.ChatClient localhost 6868
+## Network and privacy
 
-Remplacez localhost et 6868 par l'adresse IP et le port appropriés si nécessaire.
+Version 1 uses unencrypted TCP inside the LAN. Anyone able to observe the network traffic may read messages. Use it only on a trusted private network and never expose the port to the internet. Version 2 improves the user experience and packaging while keeping the same local-network scope.
 
-### Contribution
+## License
 
-Toute contribution au projet est la bienvenue ;-)
-@sofoste93
+[MIT](LICENSE) © Sofoste contributors.
+

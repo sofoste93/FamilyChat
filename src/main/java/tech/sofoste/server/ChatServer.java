@@ -1,67 +1,73 @@
 package tech.sofoste.server;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ChatServer {
-    private int port;
-    private Set<String> userNames = new HashSet<>();
-    private Set<UserThread> userThreads = new HashSet<>();
+/** Thread-safe TCP chat server used by the console edition. */
+public final class ChatServer implements AutoCloseable {
+    private final int port;
+    private final ConcurrentHashMap<String, UserThread> users = new ConcurrentHashMap<String, UserThread>();
+    private volatile boolean running;
+    private volatile ServerSocket serverSocket;
+    private volatile int boundPort = -1;
 
-    public ChatServer(int port) {
-        this.port = port;
-    }
+    public ChatServer(int port) { this.port = port; }
 
     public void execute() {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Chat Server is listening on port " + port);
-
-            while (true) {
-                Socket socket = serverSocket.accept();
-                System.out.println("New user connected");
-
-                UserThread newUser = new UserThread(socket, this);
-                userThreads.add(newUser);
-                newUser.start();
+        running = true;
+        try (ServerSocket listener = new ServerSocket(port)) {
+            serverSocket = listener;
+            boundPort = listener.getLocalPort();
+            System.out.println("FamilyChat is listening on port " + listener.getLocalPort());
+            while (running) {
+                try {
+                    Socket socket = listener.accept();
+                    socket.setKeepAlive(true);
+                    new UserThread(socket, this).start();
+                } catch (SocketException exception) {
+                    if (running) { System.err.println("Connection error: " + exception.getMessage()); }
+                }
             }
-        } catch (IOException ex) {
-            System.out.println("Error in the server: " + ex.getMessage());
-            ex.printStackTrace();
+        } catch (IOException exception) {
+            if (running) { System.err.println("Server error: " + exception.getMessage()); }
+        } finally { running = false; }
+    }
+
+    boolean register(String requestedName, UserThread thread) {
+        String name = requestedName == null ? "" : requestedName.trim();
+        return isValidName(name) && users.putIfAbsent(name, thread) == null;
+    }
+
+    private boolean isValidName(String name) {
+        return name.length() >= 2 && name.length() <= 24 && name.matches("[\\p{L}\\p{N} _.-]+");
+    }
+
+    void broadcast(String message, UserThread excluded) {
+        for (UserThread user : users.values()) { if (user != excluded) { user.sendMessage(message); } }
+    }
+
+    void remove(String userName, UserThread thread) {
+        if (userName != null && users.remove(userName, thread)) {
+            broadcast("LEAVE|" + userName, thread);
+            System.out.println(userName + " left the chat");
         }
     }
 
-    void broadcast(String message, UserThread excludeUser) {
-        for (UserThread aUser : userThreads) {
-            if (aUser != excludeUser) {
-                aUser.sendMessage(message);
-            }
-        }
-    }
+    Set<String> userNames() { return Collections.unmodifiableSet(users.keySet()); }
 
-    void addUserName(String userName) {
-        userNames.add(userName);
-    }
+    /** Exposed for launchers and integration tests using an ephemeral port. */
+    public int getBoundPort() { return boundPort; }
 
-    void removeUser(String userName, UserThread aUser) {
-        boolean removed = userNames.remove(userName);
-        if (removed) {
-            userThreads.remove(aUser);
-            System.out.println("The user: " + userName + " has left");
-        }
-    }
-
-    public boolean hasUsers() {
-        return !userNames.isEmpty();
-    }
-
-    public Set<String> getUserNames() {
-        return this.userNames;
-    }
-
-    public static void main(String[] args) {
-        int port = 6868; // modifier le port au besoin
-        ChatServer server = new ChatServer(port);
-        server.execute();
+    @Override public void close() {
+        running = false;
+        ServerSocket listener = serverSocket;
+        if (listener != null) { try { listener.close(); } catch (IOException ignored) { } }
+        for (UserThread user : users.values()) { user.closeConnection(); }
+        users.clear();
     }
 }

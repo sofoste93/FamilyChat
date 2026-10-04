@@ -2,7 +2,6 @@ package tech.sofoste.client;
 
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
 
 public class ChatClient {
     private String hostname;
@@ -44,7 +43,13 @@ public class ChatClient {
         }
 
         String hostname = args[0];
-        int port = Integer.parseInt(args[1]);
+        final int port;
+        try {
+            port = Integer.parseInt(args[1]);
+        } catch (NumberFormatException exception) {
+            System.out.println("Port must be a number.");
+            return;
+        }
 
         ChatClient client = new ChatClient(hostname, port);
         client.execute();

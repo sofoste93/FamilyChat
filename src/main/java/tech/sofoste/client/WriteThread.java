@@ -2,6 +2,7 @@ package tech.sofoste.client;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class WriteThread extends Thread {
@@ -15,7 +16,7 @@ public class WriteThread extends Thread {
 
         try {
             OutputStream output = socket.getOutputStream();
-            writer = new PrintWriter(output, true);
+            writer = new PrintWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8), true);
         } catch (IOException ex) {
             System.out.println("Error getting output stream: " + ex.getMessage());
             ex.printStackTrace();
@@ -35,7 +36,7 @@ public class WriteThread extends Thread {
             text = scanner.nextLine();
             writer.println(text);
 
-        } while (!text.equals("bye"));
+        } while (!text.equalsIgnoreCase("bye") && !text.equalsIgnoreCase("/quit"));
 
         try {
             socket.close();
